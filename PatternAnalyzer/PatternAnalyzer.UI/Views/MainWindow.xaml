@@ -1,0 +1,24 @@
+<Window x:Class="PatternAnalyzer.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:PatternAnalyzer.UI.Views"
+        mc:Ignorable="d"
+        Title="Pattern Analyzer" Height="600" Width="900">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Connection Panel -->
+        <views:ConnectionView Grid.Column="0" DataContext="{Binding ConnectionViewModel}"/>
+
+        <!-- Analysis Panel -->
+        <views:AnalysisView Grid.Column="1" DataContext="{Binding AnalysisViewModel}"/>
+    </Grid>
+</Window>
