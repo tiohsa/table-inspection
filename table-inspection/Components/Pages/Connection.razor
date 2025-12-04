@@ -1,0 +1,107 @@
+@page "/connection"
+@using PatternAnalyzer.Presentation.ViewModels
+@using PatternAnalyzer.Core.Models
+@inject ConnectionViewModel ViewModel
+
+<h3>Connection Settings</h3>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">Database Type</label>
+            <select class="form-select" @bind="ViewModel.SelectedDatabaseType">
+                @foreach (var type in ViewModel.DatabaseTypes)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Host</label>
+            <input class="form-control" @bind="ViewModel.Host" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Port</label>
+            <input type="number" class="form-control" @bind="ViewModel.Port" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Database / Service Name</label>
+            <input class="form-control" @bind="ViewModel.DatabaseName" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" @bind="ViewModel.Username" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" @bind="ViewModel.Password" />
+        </div>
+
+        <button class="btn btn-primary" @onclick="Connect">Connect</button>
+        <span class="ms-2 text-muted">@ViewModel.StatusMessage</span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Tables</div>
+            <div class="card-body" style="height: 300px; overflow-y: auto;">
+                <ul class="list-group">
+                    @foreach (var table in ViewModel.Tables)
+                    {
+                        <li class="list-group-item @(ViewModel.SelectedTable == table ? "active" : "")"
+                            @onclick="() => SelectTable(table)"
+                            style="cursor: pointer;">
+                            @table.Name <small class="text-muted">(@table.Schema)</small>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Columns</div>
+             <div class="card-body" style="height: 300px; overflow-y: auto;">
+                <ul class="list-group">
+                    @foreach (var col in ViewModel.Columns)
+                    {
+                        <li class="list-group-item @(ViewModel.SelectedColumn == col ? "active" : "")"
+                            @onclick="() => SelectColumn(col)"
+                            style="cursor: pointer;">
+                            @col.Name <small class="text-muted">(@col.DataType)</small>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private async Task Connect()
+    {
+        await ViewModel.ConnectCommand.ExecuteAsync(null);
+    }
+
+    private void SelectTable(TableInfo table)
+    {
+        ViewModel.SelectedTable = table;
+        // Since ViewModel logic might be async void (bad for Blazor), check implementation.
+        // ViewModel uses OnSelectedTableChanged which is async void.
+        // We might need to manually trigger refresh or wait.
+        // Ideally, ViewModel commands should be Tasks.
+        // For simplicity here, we assume VM handles it, but we might need StateHasChanged if it runs in background.
+    }
+
+    private void SelectColumn(ColumnInfo col)
+    {
+        ViewModel.SelectedColumn = col;
+    }
+}

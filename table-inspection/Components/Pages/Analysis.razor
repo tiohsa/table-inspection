@@ -1,0 +1,103 @@
+@page "/analysis"
+@using PatternAnalyzer.Presentation.ViewModels
+@using PatternAnalyzer.Core.Models
+@inject AnalysisViewModel ViewModel
+
+<h3>Analysis</h3>
+
+<div class="card mb-3">
+    <div class="card-header">Settings</div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">Load Preset</label>
+            <select class="form-select" @onchange="OnPresetChanged">
+                <option value="">-- Select Preset --</option>
+                @foreach (var p in ViewModel.Presets)
+                {
+                    <option value="@p.Name">@p.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Regex Pattern</label>
+            <input class="form-control" @bind="ViewModel.RegexPattern" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Sample Size</label>
+            <input type="number" class="form-control" @bind="ViewModel.SampleSize" />
+        </div>
+
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Preset Name" @bind="ViewModel.PresetName" />
+            <button class="btn btn-outline-secondary" @onclick="SavePreset">Save Preset</button>
+        </div>
+
+        <button class="btn btn-success" @onclick="Analyze" disabled="@ViewModel.IsBusy">
+            @if(ViewModel.IsBusy) { <span>Analyzing...</span> } else { <span>Analyze Column</span> }
+        </button>
+    </div>
+</div>
+
+@if (ViewModel.Result != null)
+{
+    <div class="card">
+        <div class="card-header">Results: @ViewModel.Result.ColumnName</div>
+        <div class="card-body">
+            <div class="mb-3">
+                 <strong>Match:</strong> @ViewModel.Result.IsMatch
+                 <span class="ms-3"><strong>Count:</strong> @ViewModel.Result.MatchCount (@ViewModel.Result.MatchPercentage.ToString("F2")%)</span>
+            </div>
+
+            <div class="mb-3">
+                <strong>Detected Patterns:</strong>
+                <div>
+                    @foreach(var pat in ViewModel.Result.DetectedPatterns)
+                    {
+                        <span class="badge bg-info text-dark me-1">@pat</span>
+                    }
+                </div>
+            </div>
+
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr><th>Sample Data</th></tr>
+                </thead>
+                <tbody>
+                    @foreach(var val in ViewModel.Result.SampleValues)
+                    {
+                        <tr><td>@val</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Since ViewModels are singletons, they might retain state.
+        // We ensure presets are loaded.
+        // The VM constructor loads presets via Command.Execute(null) which is fire-and-forget.
+        // We can force reload if needed.
+    }
+
+    private void OnPresetChanged(ChangeEventArgs e)
+    {
+        var name = e.Value?.ToString();
+        var preset = ViewModel.Presets.FirstOrDefault(p => p.Name == name);
+        ViewModel.SelectedPreset = preset;
+    }
+
+    private async Task SavePreset()
+    {
+        await ViewModel.SavePresetCommand.ExecuteAsync(null);
+    }
+
+    private async Task Analyze()
+    {
+        await ViewModel.AnalyzeCommand.ExecuteAsync(null);
+    }
+}
