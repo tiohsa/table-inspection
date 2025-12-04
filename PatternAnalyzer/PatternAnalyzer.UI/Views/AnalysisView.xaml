@@ -1,0 +1,87 @@
+<UserControl x:Class="PatternAnalyzer.UI.Views.AnalysisView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Settings" Grid.Row="0" Margin="5">
+            <StackPanel>
+                <DockPanel Margin="2">
+                    <Label Content="Load Preset:"/>
+                    <ComboBox ItemsSource="{Binding Presets}" SelectedItem="{Binding SelectedPreset}" DisplayMemberPath="Name"/>
+                </DockPanel>
+                <Separator Margin="5"/>
+                <DockPanel Margin="2">
+                    <Label Content="Regex Pattern:"/>
+                    <TextBox Text="{Binding RegexPattern}"/>
+                </DockPanel>
+                <DockPanel Margin="2">
+                    <Label Content="Sample Size:"/>
+                    <TextBox Text="{Binding SampleSize}"/>
+                </DockPanel>
+                <Separator Margin="5"/>
+                <DockPanel Margin="2">
+                    <Label Content="Save as:"/>
+                    <TextBox Text="{Binding PresetName}" MinWidth="100"/>
+                    <Button Content="Save Preset" Command="{Binding SavePresetCommand}" Margin="5,0"/>
+                    <Button Content="Analyze" Command="{Binding AnalyzeCommand}" Margin="20,0,0,0" Padding="10,2"/>
+                </DockPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <ProgressBar Grid.Row="1" Height="2" IsIndeterminate="True"
+                     Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+        <GroupBox Header="Results" Grid.Row="2" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Text="Match: " FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Result.IsMatch}"/>
+                    <TextBlock Text=" Count: " FontWeight="Bold" Margin="10,0,0,0"/>
+                    <TextBlock Text="{Binding Result.MatchCount}"/>
+                    <TextBlock Text=" ("/>
+                    <TextBlock Text="{Binding Result.MatchPercentage, StringFormat=N2}"/>
+                    <TextBlock Text="%)"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5">
+                    <TextBlock Text="Detected Patterns: " FontWeight="Bold"/>
+                    <ItemsControl ItemsSource="{Binding Result.DetectedPatterns}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="LightBlue" CornerRadius="3" Margin="2" Padding="3">
+                                    <TextBlock Text="{Binding}"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+
+                <DataGrid Grid.Row="2" ItemsSource="{Binding Result.SampleValues}" AutoGenerateColumns="False" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Sample Data" Binding="{Binding}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>
